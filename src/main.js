@@ -2,6 +2,8 @@ import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "./style.css";
 import { createFramePresenter } from "./frame-presenter.js";
+import { renderFeatures } from "./render-features.js";
+import { BAND_SCHEMA, validateFrame } from "./frame-data.js";
 const $ = (id) => document.getElementById(id);
 const bandColors = [
   "#6d587a",
@@ -38,7 +40,9 @@ function sourceReady(sourceId) {
 }
 const presentFrame = createFramePresenter(
   async (frame) => {
-    const bands = frame.features.filter((f) => f.properties.kind === "band");
+    const bands = renderFeatures(
+      frame.features.filter((f) => f.properties.kind === "band"),
+    );
     const nextSlot = 1 - activeSlot;
     const { source } = bandSlots[nextSlot];
     await map
@@ -297,7 +301,9 @@ function fetchFrame(i) {
     return Promise.resolve(value);
   }
   if (pending.has(key)) return pending.get(key);
-  const p = fetch(`${base}bands/${key}.geojson.gz`)
+  const p = fetch(`${base}bands/${key}.geojson.gz?schema=${BAND_SCHEMA}`, {
+    cache: "no-cache",
+  })
     .then((r) => {
       if (!r.ok) throw Error(`Frame ${key}: ${r.status}`);
       return r.arrayBuffer().then((buffer) => {
@@ -313,8 +319,7 @@ function fetchFrame(i) {
       });
     })
     .then((data) => {
-      if (data.type !== "FeatureCollection" || !Array.isArray(data.features))
-        throw Error("Invalid frame");
+      validateFrame(data);
       cache.set(key, data);
       while (cache.size > 12) cache.delete(cache.keys().next().value);
       return data;
@@ -437,12 +442,14 @@ $("about").addEventListener("click", (e) => {
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) pause();
 });
-fetch(`${base}data/manifest.json`)
+fetch(`${base}data/manifest.json`, { cache: "no-cache" })
   .then((r) => {
     if (!r.ok) throw Error("Manifest unavailable");
     return r.json();
   })
   .then((m) => {
+    if (m.bands?.bandSchema !== BAND_SCHEMA)
+      throw Error("Incompatible calendar data");
     dates = m.dates;
     if (dates.length !== 365) throw Error("Incomplete calendar");
     show(index);
