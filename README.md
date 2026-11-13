@@ -21,7 +21,7 @@ Tap filled land for its modeled local sunset to the minute, IANA zone and UTC of
 
 The app fits its map, fixed legend, date/playback controls and year slider into the visible viewport using `100svh` and safe-area insets. At phone sizes the map stays within 10 px of each screen edge and expands into the space left by compact controls; there is no page scrolling. About opens a separately scrollable dialog. Controls retain 44 px touch targets, date text is 16 px to avoid iOS focus zoom, and direct map gestures support pinch zoom and pan. The reset button restores the national view.
 
-The UI fetches a compressed daily frame and prefetches the next two. A 12-frame LRU cache bounds memory. Revision tokens prevent stale requests from replacing newer selections. Two GeoJSON sources prepare dates serially: the last complete frame stays visible while the other source loads and renders. Layers switch only after the new tiles are ready, and playback waits for presentation before scheduling another day. Failed loads keep the previous complete map visible with an error; valid empty frames are distinct. Gzip is decoded automatically by the host/browser where configured, or with the browser's native DecompressionStream (Safari 16.4+, modern Chromium/Firefox). Magic-byte detection handles both hosting behaviors.
+The UI fetches a compressed daily frame and prefetches the next two. Frame URLs include the expected data schema, HTTP caches are revalidated, and both the manifest and frame schema are checked before use. This prevents cached five-band files from being colored with the six-band legend. A 12-frame LRU cache bounds memory. Revision tokens prevent stale requests from replacing newer selections. Before tiling, disconnected MultiPolygon parts become separate Polygon features, with genuine holes and clock/bucket metadata preserved. This prevents a tiny island whose winding flips during tile rounding from causing an unrelated mainland region to be classified as a hole. Two GeoJSON sources prepare dates serially: the last complete frame stays visible while the other source loads and renders. Layers switch only after the new tiles are ready, and playback waits for presentation before scheduling another day. Failed loads keep the previous complete map visible with an error; valid empty frames are distinct. Gzip is decoded automatically by the host/browser where configured, or with the browser's native DecompressionStream (Safari 16.4+, modern Chromium/Firefox). Magic-byte detection handles both hosting behaviors.
 
 ## Reproduce the data
 
@@ -45,18 +45,20 @@ The original line-only GeoJSON (approximately 4.3 MB for the year) remains in `p
 
 `npm test` checks calendar coverage, geometry schema/bounds, DST and UTC rollover, sampling error against 0.025°, and independent `SearchRiseSet` agreement for raw and clipped points on equinoxes, solstices and both clock transitions. It derives the search window between local midnights, including 23/25-hour days. The one-minute tolerance accommodates the independent routines’ slightly different horizon models.
 
+The rendering-geometry regression reproduces the original May 3 winding failure using the actual geojson-vt tiler and MapLibre ring classifier, verifies the normalization fix, and checks all 365 frames through national/regional tile zooms 2–5. Cache-schema tests reject obsolete five-band frames.
+
 ```sh
 # A system Chromium is used by default; override if necessary.
 CHROMIUM_PATH=/usr/bin/chromium npm run test:browser
 ```
 
-The browser test starts Vite and checks rendered data, playback, delayed stale responses, failed and empty frames, the about dialog, tap inspection, gzip decoding, six fixed legend buckets, and full-screen mobile containment across six portrait/landscape viewport sizes. The March 7–8 regression checks actual pixels west of Chicago and farther south, rather than relying only on data coverage. External basemap access is required. Screenshots are saved to ignored `.cache/`.
+The browser test starts Vite and checks rendered data, playback, delayed stale responses, failed and empty frames, the about dialog, tap inspection, gzip decoding, six fixed legend buckets, and full-screen mobile containment across six portrait/landscape viewport sizes. Pixel tests cover March 7–8 west of Chicago, the May 3 Eastern region, and the supplied May 24–25 North Dakota coordinates through repeated switches of both frame buffers. They verify actual visible colors, rather than relying only on file coverage. External basemap access is required. Screenshots are saved to ignored `.cache/`.
 
 The rendering regression can also run in Safari's engine (requires Playwright WebKit and its OS libraries):
 
 ```sh
 npx playwright install webkit
-BROWSER_ENGINE=webkit npm run test:browser -- --grep 'draws the Central'
+BROWSER_ENGINE=webkit npm run test:browser -- --grep 'draws the Central|May regions|versioned requests'
 ```
 
 `WEBKIT_EXECUTABLE_PATH` optionally selects a compatible custom WebKit launcher.

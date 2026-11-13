@@ -20,7 +20,7 @@ test("renders, plays, scrubs without stale frames, handles missing and empty fra
   await page
     .getByRole("button", { name: "Pause animation", exact: true })
     .click();
-  await page.route("**/2026-01-02.geojson.gz", async (route) => {
+  await page.route("**/2026-01-02.geojson.gz*", async (route) => {
     await new Promise((r) => setTimeout(r, 800));
     await route.continue();
   });
@@ -29,16 +29,20 @@ test("renders, plays, scrubs without stale frames, handles missing and empty fra
   await expect(page.locator("#map")).toHaveAttribute("data-date", "2026-01-03");
   await page.waitForTimeout(1000);
   await expect(page.locator("#map")).toHaveAttribute("data-date", "2026-01-03");
-  await page.route("**/2026-12-01.geojson.gz", (r) =>
+  await page.route("**/2026-12-01.geojson.gz*", (r) =>
     r.fulfill({ status: 503 }),
   );
   await page.locator("#date-input").fill("2026-12-01");
   await page.locator("#date-input").dispatchEvent("change");
   await expect(page.locator("#status")).toContainText("couldn’t load");
-  await page.route("**/2026-10-01.geojson.gz", (r) =>
+  await page.route("**/2026-10-01.geojson.gz*", (r) =>
     r.fulfill({
       body: gzipSync(
-        JSON.stringify({ type: "FeatureCollection", features: [] }),
+        JSON.stringify({
+          type: "FeatureCollection",
+          bandSchema: 4,
+          features: [],
+        }),
       ),
     }),
   );
