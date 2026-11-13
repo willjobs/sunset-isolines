@@ -347,13 +347,11 @@ async function show(i) {
     status("Loading the basemap…");
     return false;
   }
-  if (!cache.has(dates[index])) status("Finding the evening…");
   try {
     const frame = await fetchFrame(index);
     if (token !== revision) return false;
     activePopup?.remove();
     activePopup = null;
-    status("Drawing the evening…");
     if (
       !(await presentFrame(
         { ...frame, date: dates[index] },
