@@ -2,55 +2,28 @@ import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "./style.css";
 const $ = (id) => document.getElementById(id);
-const hours = [17, 18, 19, 20];
-const bandColors = ["#f5e7a3", "#efbb7e", "#dc8d80", "#8b9cce", "#354f88"];
-const bandLabels = ["Before 5", "5–6", "6–7", "7–8", "8 or later"];
+const bandColors = [
+  "#6d587a",
+  "#9c7183",
+  "#c8897d",
+  "#dfab75",
+  "#efcf82",
+  "#fff0ad",
+];
+const bandLabels = ["Before 5", "5–6", "6–7", "7–8", "8–9", "9+"];
 $("band-scale").innerHTML = bandLabels
   .map(
     (label, i) =>
-      `<span><i style="background:${bandColors[i]}"></i>${label}</span>`,
+      `<span aria-label="${i === 5 ? "9 pm or later" : i === 0 ? "Before 5 pm" : label + " pm"}"><i style="background:${bandColors[i]}"></i>${label}</span>`,
   )
   .join("");
 let activePopup;
-let selectedHour = 18,
-  currentFrame = null;
-$("legend").innerHTML = [...hours, "none"]
-  .map(
-    (h) =>
-      `<button type="button" data-hour="${h}" aria-pressed="${h === selectedHour}">${h === "none" ? "None" : `${h - 12} pm`}</button>`,
-  )
-  .join("");
-$("legend").addEventListener("click", (e) => {
-  const button = e.target.closest("[data-hour]");
-  if (!button) return;
-  selectedHour = button.dataset.hour === "none" ? "none" : +button.dataset.hour;
-  document
-    .querySelectorAll("#legend [data-hour]")
-    .forEach((b) => b.setAttribute("aria-pressed", String(b === button)));
-  if (currentFrame && ready) renderContours();
-});
-function renderContours() {
-  const bands = currentFrame.features.filter(
-    (f) => f.properties.kind === "band",
-  );
-  const features = currentFrame.features.filter(
-    (f) =>
-      f.properties.kind === "threshold" &&
-      f.properties.cutoffHour === selectedHour,
-  );
+function renderBands(frame) {
+  const bands = frame.features.filter((f) => f.properties.kind === "band");
   map
     .getSource("bands")
     .setData({ type: "FeatureCollection", features: bands });
-  map.getSource("sunset").setData({ type: "FeatureCollection", features });
-  $("map").dataset.hour = String(selectedHour);
-  $("map").dataset.featureCount = String(features.length);
   $("map").dataset.bandCount = String(bands.length);
-  $("contour-note").textContent =
-    selectedHour === "none"
-      ? "Tap the map for a local sunset time."
-      : features.length
-        ? `${selectedHour - 12}:00 pm cutoff highlighted · Tap the map to inspect`
-        : `No ${selectedHour - 12}:00 pm boundary on this date. All five bands remain available.`;
   status(bands.length ? "" : "No sunset areas available on this date.");
 }
 $("months").innerHTML = [
@@ -94,7 +67,7 @@ const map = new maplibregl.Map({
   renderWorldCopies: false,
   attributionControl: { compact: true },
   fadeDuration: 200,
-  cooperativeGestures: window.matchMedia("(pointer: coarse)").matches,
+  cooperativeGestures: false,
 });
 map.dragRotate.disable();
 map.touchZoomRotate.disableRotation();
@@ -105,7 +78,7 @@ const fit = () =>
       [-66.5, 50],
     ],
     {
-      padding: { top: 45, bottom: 75, left: 20, right: 20 },
+      padding: { top: 12, bottom: 28, left: 10, right: 10 },
       duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches
         ? 0
         : 900,
@@ -121,12 +94,10 @@ map.on("resize", () => {
           [-125, 24],
           [-66.5, 50],
         ],
-        { padding: { top: 45, bottom: 75, left: 20, right: 20 }, duration: 0 },
+        { padding: { top: 12, bottom: 28, left: 10, right: 10 }, duration: 0 },
       );
   }, 150);
 });
-$("zoom-in").onclick = () => map.zoomIn();
-$("zoom-out").onclick = () => map.zoomOut();
 $("reset").onclick = fit;
 map.on("error", (e) => {
   if (!ready)
@@ -145,7 +116,6 @@ map.on("load", () => {
     if (l.type === "fill" && /park|landcover|landuse/i.test(l.id))
       map.setPaintProperty(l.id, "fill-opacity", 0.35);
   }
-  map.addSource("sunset", { type: "geojson", data: empty });
   map.addSource("bands", { type: "geojson", data: empty });
   const firstLabel = map.getStyle().layers.find((l) => l.type === "symbol")?.id;
   map.addLayer(
@@ -160,7 +130,7 @@ map.on("load", () => {
           ...bandColors.flatMap((c, i) => [i, c]),
           "#ccc",
         ],
-        "fill-opacity": 0.88,
+        "fill-opacity": 1,
         "fill-antialias": false,
       },
     },
@@ -172,65 +142,6 @@ map.on("load", () => {
     type: "line",
     source: "states",
     paint: { "line-color": "#859b8b", "line-width": 0.6, "line-opacity": 0.4 },
-  });
-  const label = map.getStyle().layers.find((l) => l.type === "symbol")?.id;
-  map.addLayer(
-    {
-      id: "sunset-casing",
-      type: "line",
-      source: "sunset",
-      layout: { "line-cap": "round", "line-join": "round" },
-      paint: {
-        "line-color": "#fffdf2",
-        "line-width": ["interpolate", ["linear"], ["zoom"], 3, 5, 7, 7],
-        "line-opacity": 0.85,
-      },
-    },
-    label,
-  );
-  map.addLayer(
-    {
-      id: "sunset-lines",
-      type: "line",
-      source: "sunset",
-      layout: { "line-cap": "round", "line-join": "round" },
-      paint: {
-        "line-color": "#253a3a",
-        "line-width": ["interpolate", ["linear"], ["zoom"], 3, 2.4, 7, 3.5],
-        "line-opacity": 0.95,
-      },
-    },
-    label,
-  );
-  map.addLayer({
-    id: "sunset-hit",
-    type: "line",
-    source: "sunset",
-    paint: { "line-width": 18, "line-opacity": 0 },
-  });
-  map.addLayer({
-    id: "sunset-labels",
-    type: "symbol",
-    source: "sunset",
-    layout: {
-      "symbol-placement": "line",
-      "symbol-spacing": 190,
-      "text-field": [
-        "concat",
-        ["to-string", ["-", ["get", "cutoffHour"], 12]],
-        ":00 pm cutoff",
-      ],
-      "text-font": ["Noto Sans Regular"],
-      "text-size": 12,
-      "text-letter-spacing": 0.04,
-      "text-padding": 5,
-      "text-keep-upright": true,
-    },
-    paint: {
-      "text-color": "#253a3a",
-      "text-halo-color": "#fffdf2",
-      "text-halo-width": 2.5,
-    },
   });
   const cities = [
     ["Seattle", -122.33, 47.61],
@@ -369,26 +280,6 @@ function updateDate() {
     d.toLocaleDateString("en-US", { dateStyle: "long", timeZone: "UTC" }),
   );
   $("date-input").value = key;
-  $("date-display").innerHTML =
-    `${d.toLocaleDateString("en-US", { month: "long", day: "numeric", timeZone: "UTC" })}<span>2026</span>`;
-  $("day-number").textContent = `DAY ${index + 1} OF 365`;
-  const events = {
-    "03-20": "THE SPRING EQUINOX",
-    "06-21": "THE SUMMER SOLSTICE",
-    "09-22": "THE AUTUMN EQUINOX",
-    "12-21": "THE WINTER SOLSTICE",
-    "03-08": "DAYLIGHT SAVING BEGINS",
-    "11-01": "STANDARD TIME RETURNS",
-  };
-  const season =
-    index < 78 || index >= 354
-      ? "WINTER"
-      : index < 171
-        ? "SPRING"
-        : index < 264
-          ? "SUMMER"
-          : "AUTUMN";
-  $("season").textContent = events[key.slice(5)] || `AN EVENING IN ${season}`;
 }
 async function show(i) {
   if (!dates.length) return false;
@@ -405,8 +296,7 @@ async function show(i) {
     if (token !== revision) return false;
     activePopup?.remove();
     activePopup = null;
-    currentFrame = frame;
-    renderContours();
+    renderBands(frame);
     displayed = index;
     $("map").dataset.date = dates[index];
     for (let n = 1; n <= 2; n++)
@@ -416,9 +306,7 @@ async function show(i) {
     if (token === revision) {
       activePopup?.remove();
       activePopup = null;
-      currentFrame = null;
       map.getSource("bands").setData(empty);
-      map.getSource("sunset").setData(empty);
       delete $("map").dataset.date;
       status("This evening couldn’t load. Choose another date or retry.", true);
       pause();
@@ -433,7 +321,6 @@ function pause() {
   $("play").setAttribute("aria-pressed", "false");
   $("play").innerHTML =
     '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 11 7-11 7Z"/></svg>';
-  $("play-label").textContent = "Let the year unfold";
 }
 async function tick() {
   if (!playing) return;
@@ -451,7 +338,6 @@ $("play").onclick = async () => {
   $("play").setAttribute("aria-pressed", "true");
   $("play").innerHTML =
     '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>';
-  $("play-label").textContent = "Following the evening";
   if (displayed !== index) await show(index);
   if (playing) timer = setTimeout(tick, +$("speed").value);
 };
@@ -474,15 +360,7 @@ $("next").onclick = () => {
   pause();
   show(index + 1);
 };
-document.querySelectorAll("[data-date]").forEach(
-  (b) =>
-    (b.onclick = () => {
-      pause();
-      show(dates.indexOf(b.dataset.date));
-    }),
-);
-for (const id of ["about-open", "method-open"])
-  $(id).onclick = () => $("about").showModal();
+$("about-open").onclick = () => $("about").showModal();
 $("about-close").onclick = () => $("about").close();
 $("about").addEventListener("click", (e) => {
   if (e.target === $("about")) {
