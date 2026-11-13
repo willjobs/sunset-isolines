@@ -11,14 +11,8 @@ test("renders, plays, scrubs without stale frames, handles missing and empty fra
     "2026-03-01",
     { timeout: 30000 },
   );
-  await expect(page.locator("#map")).toHaveAttribute("data-hour", "18");
-  expect(
-    +(await page.locator("#map").getAttribute("data-feature-count")),
-  ).toBeGreaterThan(0);
-  await page.getByRole("button", { name: "7 pm", exact: true }).click();
-  await expect(page.locator("#map")).toHaveAttribute("data-hour", "19");
-  await page.getByRole("button", { name: "None", exact: true }).click();
-  await expect(page.locator("#map")).toHaveAttribute("data-hour", "none");
+  await expect(page.locator("[data-hour]")).toHaveCount(0);
+  await expect(page.locator("#band-scale > span")).toHaveCount(6);
   await page
     .getByRole("button", { name: "Play animation", exact: true })
     .click();
@@ -56,13 +50,9 @@ test("renders, plays, scrubs without stale frames, handles missing and empty fra
   await page.keyboard.press("Escape");
   await expect(page.locator("dialog")).not.toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.getByRole("button", { name: "Summer solstice" }).click();
+  await page.locator("#date-input").fill("2026-06-21");
+  await page.locator("#date-input").dispatchEvent("change");
   await expect(page.locator("#map")).toHaveAttribute("data-date", "2026-06-21");
-  await page.getByRole("button", { name: "6 pm", exact: true }).click();
-  await expect(page.locator("#contour-note")).toContainText(
-    "No 6:00 pm boundary",
-  );
-  await page.getByRole("button", { name: "8 pm", exact: true }).click();
   await expect(page.locator("#status")).toBeEmpty();
   expect(
     +(await page.locator("#map").getAttribute("data-band-count")),
@@ -107,15 +97,7 @@ test("iPhone-sized touch controls and map inspection", async ({ browser }) => {
     "2026-03-01",
     { timeout: 30000 },
   );
-  for (const selector of [
-    "#play",
-    "#previous",
-    "#next",
-    "#legend button",
-    "#zoom-in",
-    "#zoom-out",
-    "#reset",
-  ]) {
+  for (const selector of ["#play", "#previous", "#next", "#reset"]) {
     for (const element of await page.locator(selector).all()) {
       const box = await element.boundingBox();
       expect(box.width).toBeGreaterThanOrEqual(44);
@@ -127,19 +109,51 @@ test("iPhone-sized touch controls and map inspection", async ({ browser }) => {
       .locator("#date-input")
       .evaluate((e) => getComputedStyle(e).fontSize),
   ).toBe("16px");
-  await page.getByRole("button", { name: "7 pm", exact: true }).tap();
-  await expect(page.locator("#map")).toHaveAttribute("data-hour", "19");
   await page.locator("#next").tap();
   await expect(page.locator("#map")).toHaveAttribute("data-date", "2026-03-02");
   const map = await page.locator("#map").boundingBox(),
     legend = await page.locator(".legend").boundingBox();
   expect(legend.y).toBeGreaterThanOrEqual(map.y + map.height);
   await page.screenshot({ path: ".cache/iphone-bands.png", fullPage: true });
-  await page.setViewportSize({ width: 320, height: 568 });
-  expect(
-    await page.evaluate(
-      () => document.documentElement.scrollWidth <= innerWidth,
-    ),
-  ).toBe(true);
+  for (const [width, height] of [
+    [320, 568],
+    [375, 667],
+    [390, 664],
+    [390, 844],
+    [430, 932],
+    [844, 390],
+  ]) {
+    await page.setViewportSize({ width, height });
+    await page.waitForTimeout(250);
+    expect(
+      await page.evaluate(
+        () =>
+          document.documentElement.scrollHeight <= innerHeight &&
+          document.documentElement.scrollWidth <= innerWidth,
+      ),
+      `No scrolling at ${width}×${height}`,
+    ).toBe(true);
+    for (const selector of [
+      "header",
+      ".intro",
+      ".map-shell",
+      ".legend",
+      ".timeline",
+      "#play",
+      "#date-input",
+      "#timeline",
+      "#speed",
+    ]) {
+      const element = page.locator(selector);
+      if (!(await element.isVisible())) continue;
+      const box = await element.boundingBox();
+      expect(box.y).toBeGreaterThanOrEqual(0);
+      expect(box.y + box.height).toBeLessThanOrEqual(height + 1);
+      expect(box.x + box.width).toBeLessThanOrEqual(width + 1);
+    }
+    const mapBox = await page.locator(".map-shell").boundingBox();
+    expect(mapBox.width).toBeGreaterThanOrEqual(width - 24);
+    expect(mapBox.height).toBeGreaterThan(120);
+  }
   await context.close();
 });
