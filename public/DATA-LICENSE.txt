@@ -5,7 +5,7 @@ Contains information from Timezone Boundary Builder, release 2025b:
 https://github.com/evansiroky/timezone-boundary-builder/releases/tag/2025b
 Database licensed under ODbL; includes data from OpenStreetMap contributors.
 © OpenStreetMap contributors — https://www.openstreetmap.org/copyright
-The derived, land-clipped contour database in data/ is distributed under ODbL.
+The derived, land-clipped contour database in data/ and bands/ is distributed under ODbL.
 
 U.S. land mask: US Atlas 3.0.1 states-10m.json (ISC), derived from U.S. Census
 Bureau cartographic boundaries (public domain).

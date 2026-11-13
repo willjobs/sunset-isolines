@@ -373,5 +373,26 @@
   "tzdata": "2026e",
   "shapely": "2.1.2",
   "altitude": -0.833333,
-  "latitudeStep": 0.1
+  "latitudeStep": 0.1,
+  "bands": {
+    "buckets": [
+      "Before 5 pm",
+      "5\u20136 pm",
+      "6\u20137 pm",
+      "7\u20138 pm",
+      "8 pm or later"
+    ],
+    "format": "gzip GeoJSON",
+    "simplificationDegrees": 0.002,
+    "coverage": "US zone polygons with Census/OSM coastal gaps assigned to nearest US zone",
+    "colors": [
+      "#f5e7a3",
+      "#efbb7e",
+      "#dc8d80",
+      "#8b9cce",
+      "#354f88"
+    ],
+    "bandSchema": 3,
+    "coordinatePrecisionDegrees": 1e-05
+  }
 }
