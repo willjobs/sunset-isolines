@@ -2,14 +2,46 @@ import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "./style.css";
 const $ = (id) => document.getElementById(id);
-const colors = ["#cfad55", "#e28a45", "#cf5d4c", "#9d6c88", "#657fa4"];
 const hours = [17, 18, 19, 20, 21];
-$("legend").innerHTML = hours
+let selectedHour = 18,
+  currentFrame = null;
+$("legend").innerHTML = [...hours, "all"]
   .map(
-    (h, i) =>
-      `<span class="legend-item"><i style="--color:${colors[i]}"></i>${h - 12} pm</span>`,
+    (h) =>
+      `<button type="button" data-hour="${h}" aria-pressed="${h === selectedHour}">${h === "all" ? "All hours" : `${h - 12} pm`}</button>`,
   )
   .join("");
+$("legend").addEventListener("click", (e) => {
+  const button = e.target.closest("[data-hour]");
+  if (!button) return;
+  selectedHour = button.dataset.hour === "all" ? "all" : +button.dataset.hour;
+  document
+    .querySelectorAll("[data-hour]")
+    .forEach((b) => b.setAttribute("aria-pressed", String(b === button)));
+  if (currentFrame && ready) renderContours();
+});
+function renderContours() {
+  const features =
+    selectedHour === "all"
+      ? currentFrame.features
+      : currentFrame.features.filter(
+          (f) => f.properties.cutoffHour === selectedHour,
+        );
+  map.getSource("sunset").setData({ type: "FeatureCollection", features });
+  $("map").dataset.hour = String(selectedHour);
+  $("map").dataset.featureCount = String(features.length);
+  $("contour-note").textContent =
+    selectedHour === "all"
+      ? "Read the clock time printed on each contour."
+      : `Every segment marks a ${selectedHour - 12}:00 pm sunset, local time.`;
+  status(
+    features.length
+      ? ""
+      : selectedHour === "all"
+        ? "No 5–9 pm sunset contours on this date."
+        : `No ${selectedHour - 12}:00 pm sunset contour on this date. Try another hour or date.`,
+  );
+}
 $("months").innerHTML = [
   "Jan",
   "Feb",
@@ -28,7 +60,7 @@ $("months").innerHTML = [
   .join("");
 const base = import.meta.env.BASE_URL;
 let dates = [],
-  index = 171,
+  index = 59,
   displayed = -1,
   revision = 0,
   playing = false,
@@ -110,12 +142,6 @@ map.on("load", () => {
     paint: { "line-color": "#859b8b", "line-width": 0.6, "line-opacity": 0.4 },
   });
   const label = map.getStyle().layers.find((l) => l.type === "symbol")?.id;
-  const color = [
-    "match",
-    ["get", "cutoffHour"],
-    ...hours.flatMap((h, i) => [h, colors[i]]),
-    "#888",
-  ];
   map.addLayer(
     {
       id: "sunset-casing",
@@ -137,7 +163,7 @@ map.on("load", () => {
       source: "sunset",
       layout: { "line-cap": "round", "line-join": "round" },
       paint: {
-        "line-color": color,
+        "line-color": "#ad623f",
         "line-width": ["interpolate", ["linear"], ["zoom"], 3, 2.4, 7, 3.5],
         "line-opacity": 0.95,
       },
@@ -149,6 +175,30 @@ map.on("load", () => {
     type: "line",
     source: "sunset",
     paint: { "line-width": 18, "line-opacity": 0 },
+  });
+  map.addLayer({
+    id: "sunset-labels",
+    type: "symbol",
+    source: "sunset",
+    layout: {
+      "symbol-placement": "line",
+      "symbol-spacing": 190,
+      "text-field": [
+        "concat",
+        ["to-string", ["-", ["get", "cutoffHour"], 12]],
+        ":00 pm",
+      ],
+      "text-font": ["Noto Sans Regular"],
+      "text-size": 12,
+      "text-letter-spacing": 0.04,
+      "text-padding": 5,
+      "text-keep-upright": true,
+    },
+    paint: {
+      "text-color": "#713d28",
+      "text-halo-color": "#fffdf2",
+      "text-halo-width": 2.5,
+    },
   });
   map.on(
     "mouseenter",
@@ -238,17 +288,16 @@ async function show(i) {
   try {
     const frame = await fetchFrame(index);
     if (token !== revision) return false;
-    map.getSource("sunset").setData(frame);
+    currentFrame = frame;
+    renderContours();
     displayed = index;
     $("map").dataset.date = dates[index];
-    status(
-      frame.features.length ? "" : "No 5–9 pm sunset contours on this date.",
-    );
     for (let n = 1; n <= 5; n++)
       fetchFrame((index + n) % dates.length).catch(() => {});
     return true;
   } catch (e) {
     if (token === revision) {
+      currentFrame = null;
       map.getSource("sunset").setData(empty);
       delete $("map").dataset.date;
       status("This evening couldn’t load. Choose another date or retry.", true);

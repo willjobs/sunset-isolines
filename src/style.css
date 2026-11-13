@@ -769,3 +769,34 @@ dialog a {
   stroke-width: 1.2;
   vertical-align: middle;
 }
+
+.legend-items {
+  gap: 4px;
+}
+.legend-items button {
+  font-size: 11px;
+  padding: 7px 10px;
+  border: 1px solid #d8ddcf;
+  border-radius: 3px;
+  background: #f6f7ef;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+.legend-items button:hover {
+  background: #e7e9dc;
+}
+.legend-items button[aria-pressed="true"] {
+  background: #ad623f;
+  border-color: #ad623f;
+  color: #fffdf2;
+}
+@media (max-width: 700px) {
+  .legend-items button {
+    font-size: 9px;
+    padding: 6px 8px;
+  }
+  .legend p {
+    font-size: 8px;
+  }
+}

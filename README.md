@@ -15,9 +15,9 @@ Open http://localhost:5173. `npm run build` produces `dist/`; `npm run preview` 
 
 ## Use
 
-Drag the timeline, choose a date, step a day with the arrows, or jump to an equinox or solstice. Play advances by calendar day at the selected pace, wrapping after December 31. Playback pauses when the tab is hidden. Click a contour for its time and zone. Zoom/pan and use the target button to return to the national view.
+Drag the timeline, choose a date, step a day with the arrows, or jump to an equinox or solstice. Play advances by calendar day at the selected pace, wrapping after December 31. Playback pauses when the tab is hidden. Choose a sunset hour to isolate all places with that local sunset time, or select All hours to compare the labeled contours. Click a contour for its time and zone. Zoom/pan and use the target button to return to the national view.
 
-The UI requests the selected frame and prefetches the next five. A 32-frame LRU cache bounds memory. Revision tokens prevent stale requests from overwriting a newer selection; failed frames and valid empty frames have distinct states. Dates without a particular sunset cutoff simply omit that contour. The initial frame is the summer solstice, June 21.
+The UI requests the selected frame and prefetches the next five. A 32-frame LRU cache bounds memory. Revision tokens prevent stale requests from overwriting a newer selection; failed frames and valid empty frames have distinct states. Dates without a particular sunset cutoff simply omit that contour. The initial frame is March 1, showing only the 6 pm contour. Select another local hour or All hours; every contour uses one consistent ink color and carries its clock time as a direct label. A selected hour can have no contour on a particular date (for example 6 pm at the summer solstice); the map explains that explicitly.
 
 ## Reproduce the data
 

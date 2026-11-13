@@ -7,13 +7,21 @@ test("renders, plays, scrubs without stale frames, handles missing and empty fra
   await page.goto("/");
   await expect(page.locator("#map")).toHaveAttribute(
     "data-date",
-    "2026-06-21",
+    "2026-03-01",
     { timeout: 30000 },
   );
+  await expect(page.locator("#map")).toHaveAttribute("data-hour", "18");
+  expect(
+    +(await page.locator("#map").getAttribute("data-feature-count")),
+  ).toBeGreaterThan(0);
+  await page.getByRole("button", { name: "7 pm", exact: true }).click();
+  await expect(page.locator("#map")).toHaveAttribute("data-hour", "19");
+  await page.getByRole("button", { name: "All hours", exact: true }).click();
+  await expect(page.locator("#map")).toHaveAttribute("data-hour", "all");
   await page
     .getByRole("button", { name: "Play animation", exact: true })
     .click();
-  await expect(page.locator("#date-input")).not.toHaveValue("2026-06-21");
+  await expect(page.locator("#date-input")).not.toHaveValue("2026-03-01");
   await page
     .getByRole("button", { name: "Pause animation", exact: true })
     .click();
@@ -43,6 +51,12 @@ test("renders, plays, scrubs without stale frames, handles missing and empty fra
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByRole("button", { name: "Summer solstice" }).click();
   await expect(page.locator("#map")).toHaveAttribute("data-date", "2026-06-21");
+  await page.getByRole("button", { name: "6 pm", exact: true }).click();
+  await expect(page.locator("#status")).toContainText(
+    "No 6:00 pm sunset contour",
+  );
+  await page.getByRole("button", { name: "9 pm", exact: true }).click();
+  await expect(page.locator("#status")).toBeEmpty();
   await page.waitForTimeout(1000);
   expect(
     await page.evaluate(
