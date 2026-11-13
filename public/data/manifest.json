@@ -380,19 +380,21 @@
       "5\u20136 pm",
       "6\u20137 pm",
       "7\u20138 pm",
-      "8 pm or later"
+      "8\u20139 pm",
+      "9 pm or later"
     ],
     "format": "gzip GeoJSON",
     "simplificationDegrees": 0.002,
     "coverage": "US zone polygons with Census/OSM coastal gaps assigned to nearest US zone",
     "colors": [
-      "#f5e7a3",
-      "#efbb7e",
-      "#dc8d80",
-      "#8b9cce",
-      "#354f88"
+      "#6d587a",
+      "#9c7183",
+      "#c8897d",
+      "#dfab75",
+      "#efcf82",
+      "#fff0ad"
     ],
-    "bandSchema": 3,
+    "bandSchema": 4,
     "coordinatePrecisionDegrees": 1e-05
   }
 }

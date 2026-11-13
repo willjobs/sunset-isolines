@@ -38,7 +38,7 @@ Path(".cache/band-zones.json").write_text(
 land = unary_union(list(zones.values()))
 out = Path("public/bands")
 out.mkdir(exist_ok=True)
-labels = ["Before 5 pm", "5–6 pm", "6–7 pm", "7–8 pm", "8 pm or later"]
+labels = ["Before 5 pm", "5–6 pm", "6–7 pm", "7–8 pm", "8–9 pm", "9 pm or later"]
 for frame in frames:
     existing = out / (frame["date"] + ".geojson.gz")
     if "--resume" in sys.argv and existing.exists():
@@ -53,8 +53,8 @@ for frame in frames:
     features = []
     for tz, zone in zones.items():
         previous = None
-        for bucket in range(5):
-            if bucket < 4:
+        for bucket in range(6):
+            if bucket < 5:
                 paths = by_zone[tz][17 + bucket]
                 curve = [
                     [lon - 360 if lon > 0 else lon, lat]
@@ -95,11 +95,11 @@ manifest = json.load(open("public/data/manifest.json"))
 manifest["bands"] = {
     "buckets": labels,
     "format": "gzip GeoJSON",
-    "bandSchema": 3,
+    "bandSchema": 4,
     "coordinatePrecisionDegrees": 0.00001,
     "simplificationDegrees": 0.002,
     "coverage": "US zone polygons with Census/OSM coastal gaps assigned to nearest US zone",
-    "colors": ["#f5e7a3", "#efbb7e", "#dc8d80", "#8b9cce", "#354f88"],
+    "colors": ["#6d587a", "#9c7183", "#c8897d", "#dfab75", "#efcf82", "#fff0ad"],
 }
 Path("public/data/manifest.json").write_text(json.dumps(manifest, indent=2))
 print("Compressed bands:", sum(p.stat().st_size for p in out.glob("*.gz")), "bytes")
