@@ -2,45 +2,56 @@ import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "./style.css";
 const $ = (id) => document.getElementById(id);
-const hours = [17, 18, 19, 20, 21];
+const hours = [17, 18, 19, 20];
+const bandColors = ["#f5e7a3", "#efbb7e", "#dc8d80", "#8b9cce", "#354f88"];
+const bandLabels = ["Before 5", "5–6", "6–7", "7–8", "8 or later"];
+$("band-scale").innerHTML = bandLabels
+  .map(
+    (label, i) =>
+      `<span><i style="background:${bandColors[i]}"></i>${label}</span>`,
+  )
+  .join("");
+let activePopup;
 let selectedHour = 18,
   currentFrame = null;
-$("legend").innerHTML = [...hours, "all"]
+$("legend").innerHTML = [...hours, "none"]
   .map(
     (h) =>
-      `<button type="button" data-hour="${h}" aria-pressed="${h === selectedHour}">${h === "all" ? "All hours" : `${h - 12} pm`}</button>`,
+      `<button type="button" data-hour="${h}" aria-pressed="${h === selectedHour}">${h === "none" ? "None" : `${h - 12} pm`}</button>`,
   )
   .join("");
 $("legend").addEventListener("click", (e) => {
   const button = e.target.closest("[data-hour]");
   if (!button) return;
-  selectedHour = button.dataset.hour === "all" ? "all" : +button.dataset.hour;
+  selectedHour = button.dataset.hour === "none" ? "none" : +button.dataset.hour;
   document
-    .querySelectorAll("[data-hour]")
+    .querySelectorAll("#legend [data-hour]")
     .forEach((b) => b.setAttribute("aria-pressed", String(b === button)));
   if (currentFrame && ready) renderContours();
 });
 function renderContours() {
-  const features =
-    selectedHour === "all"
-      ? currentFrame.features
-      : currentFrame.features.filter(
-          (f) => f.properties.cutoffHour === selectedHour,
-        );
+  const bands = currentFrame.features.filter(
+    (f) => f.properties.kind === "band",
+  );
+  const features = currentFrame.features.filter(
+    (f) =>
+      f.properties.kind === "threshold" &&
+      f.properties.cutoffHour === selectedHour,
+  );
+  map
+    .getSource("bands")
+    .setData({ type: "FeatureCollection", features: bands });
   map.getSource("sunset").setData({ type: "FeatureCollection", features });
   $("map").dataset.hour = String(selectedHour);
   $("map").dataset.featureCount = String(features.length);
+  $("map").dataset.bandCount = String(bands.length);
   $("contour-note").textContent =
-    selectedHour === "all"
-      ? "Read the clock time printed on each contour."
-      : `Every segment marks a ${selectedHour - 12}:00 pm sunset, local time.`;
-  status(
-    features.length
-      ? ""
-      : selectedHour === "all"
-        ? "No 5–9 pm sunset contours on this date."
-        : `No ${selectedHour - 12}:00 pm sunset contour on this date. Try another hour or date.`,
-  );
+    selectedHour === "none"
+      ? "Tap the map for a local sunset time."
+      : features.length
+        ? `${selectedHour - 12}:00 pm cutoff highlighted · Tap the map to inspect`
+        : `No ${selectedHour - 12}:00 pm boundary on this date. All five bands remain available.`;
+  status(bands.length ? "" : "No sunset areas available on this date.");
 }
 $("months").innerHTML = [
   "Jan",
@@ -83,6 +94,7 @@ const map = new maplibregl.Map({
   renderWorldCopies: false,
   attributionControl: { compact: true },
   fadeDuration: 200,
+  cooperativeGestures: window.matchMedia("(pointer: coarse)").matches,
 });
 map.dragRotate.disable();
 map.touchZoomRotate.disableRotation();
@@ -134,6 +146,26 @@ map.on("load", () => {
       map.setPaintProperty(l.id, "fill-opacity", 0.35);
   }
   map.addSource("sunset", { type: "geojson", data: empty });
+  map.addSource("bands", { type: "geojson", data: empty });
+  const firstLabel = map.getStyle().layers.find((l) => l.type === "symbol")?.id;
+  map.addLayer(
+    {
+      id: "sunset-bands",
+      type: "fill",
+      source: "bands",
+      paint: {
+        "fill-color": [
+          "match",
+          ["get", "bucket"],
+          ...bandColors.flatMap((c, i) => [i, c]),
+          "#ccc",
+        ],
+        "fill-opacity": 0.88,
+        "fill-antialias": false,
+      },
+    },
+    firstLabel,
+  );
   map.addSource("states", { type: "geojson", data: `${base}states.geojson` });
   map.addLayer({
     id: "state-boundaries",
@@ -163,7 +195,7 @@ map.on("load", () => {
       source: "sunset",
       layout: { "line-cap": "round", "line-join": "round" },
       paint: {
-        "line-color": "#ad623f",
+        "line-color": "#253a3a",
         "line-width": ["interpolate", ["linear"], ["zoom"], 3, 2.4, 7, 3.5],
         "line-opacity": 0.95,
       },
@@ -186,7 +218,7 @@ map.on("load", () => {
       "text-field": [
         "concat",
         ["to-string", ["-", ["get", "cutoffHour"], 12]],
-        ":00 pm",
+        ":00 pm cutoff",
       ],
       "text-font": ["Noto Sans Regular"],
       "text-size": 12,
@@ -195,26 +227,99 @@ map.on("load", () => {
       "text-keep-upright": true,
     },
     paint: {
-      "text-color": "#713d28",
+      "text-color": "#253a3a",
       "text-halo-color": "#fffdf2",
       "text-halo-width": 2.5,
     },
   });
+  const cities = [
+    ["Seattle", -122.33, 47.61],
+    ["San Francisco", -122.42, 37.77],
+    ["Los Angeles", -118.24, 34.05],
+    ["Denver", -104.99, 39.74],
+    ["Dallas", -96.8, 32.78],
+    ["Chicago", -87.63, 41.88],
+    ["Atlanta", -84.39, 33.75],
+    ["Miami", -80.19, 25.76],
+    ["New York", -74.01, 40.71],
+  ];
+  map.addSource("atlas-cities", {
+    type: "geojson",
+    data: {
+      type: "FeatureCollection",
+      features: cities.map(([name, lon, lat]) => ({
+        type: "Feature",
+        properties: { name },
+        geometry: { type: "Point", coordinates: [lon, lat] },
+      })),
+    },
+  });
+  map.addLayer({
+    id: "atlas-city-dots",
+    type: "circle",
+    source: "atlas-cities",
+    maxzoom: 5,
+    paint: {
+      "circle-radius": 2,
+      "circle-color": "#253a3a",
+      "circle-stroke-color": "#fffdf2",
+      "circle-stroke-width": 1,
+    },
+  });
+  map.addLayer({
+    id: "atlas-city-labels",
+    type: "symbol",
+    source: "atlas-cities",
+    maxzoom: 5,
+    layout: {
+      "text-field": ["get", "name"],
+      "text-font": ["Noto Sans Regular"],
+      "text-size": ["interpolate", ["linear"], ["zoom"], 2, 10, 4, 12],
+      "text-anchor": "left",
+      "text-offset": [0.5, 0],
+      "text-padding": 3,
+    },
+    paint: {
+      "text-color": "#253a3a",
+      "text-halo-color": "#fffdf2",
+      "text-halo-width": 1.5,
+    },
+  });
   map.on(
     "mouseenter",
-    "sunset-hit",
-    () => (map.getCanvas().style.cursor = "pointer"),
+    "sunset-bands",
+    () => (map.getCanvas().style.cursor = "crosshair"),
   );
-  map.on("mouseleave", "sunset-hit", () => (map.getCanvas().style.cursor = ""));
-  map.on("click", "sunset-hit", (e) => {
+  map.on(
+    "mouseleave",
+    "sunset-bands",
+    () => (map.getCanvas().style.cursor = ""),
+  );
+  map.on("click", "sunset-bands", async (e) => {
     const f = e.features[0];
-    if (!f) return;
-    new maplibregl.Popup({ closeButton: false })
+    if (!f || displayed < 0) return;
+    pause();
+    activePopup?.remove();
+    const date = dates[displayed],
+      tz = f.properties.tzid;
+    const popup = new maplibregl.Popup({ closeButton: true, maxWidth: "290px" })
       .setLngLat(e.lngLat)
-      .setHTML(
-        `<strong>${f.properties.cutoffHour - 12}:00 pm sunset</strong><p>${new Date(dates[displayed] + "T12:00:00Z").toLocaleDateString("en-US", { month: "long", day: "numeric", timeZone: "UTC" })}</p><span>${f.properties.tzid.replaceAll("_", " ")}</span>`,
-      )
+      .setHTML("<p>Calculating local sunset…</p>")
       .addTo(map);
+    activePopup = popup;
+    try {
+      const { localSunset } = await import("./sunset.js");
+      const sunset = localSunset(date, tz, e.lngLat.lat, e.lngLat.lng);
+      if (activePopup !== popup || dates[displayed] !== date) return;
+      popup.setHTML(
+        `<span>LOCAL SUNSET · ${new Date(date + "T12:00:00Z").toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" })}</span><strong>${sunset.label}</strong><p>${tz.replaceAll("_", " ")} · ${sunset.offset}</p><span>${e.lngLat.lat.toFixed(3)}°, ${e.lngLat.lng.toFixed(3)}° · Modeled horizon</span>`,
+      );
+    } catch {
+      if (activePopup === popup)
+        popup.setHTML(
+          "<p>Sunset could not be calculated. Please try again.</p>",
+        );
+    }
   });
   ready = true;
   fit();
@@ -229,16 +334,26 @@ function fetchFrame(i) {
     return Promise.resolve(value);
   }
   if (pending.has(key)) return pending.get(key);
-  const p = fetch(`${base}data/${key}.geojson`)
+  const p = fetch(`${base}bands/${key}.geojson.gz`)
     .then((r) => {
       if (!r.ok) throw Error(`Frame ${key}: ${r.status}`);
-      return r.json();
+      return r.arrayBuffer().then((buffer) => {
+        const bytes = new Uint8Array(buffer);
+        // Some hosts set Content-Encoding and the browser decompresses first.
+        if (bytes[0] === 0x1f && bytes[1] === 0x8b)
+          return new Response(
+            new Blob([buffer])
+              .stream()
+              .pipeThrough(new DecompressionStream("gzip")),
+          ).json();
+        return JSON.parse(new TextDecoder().decode(bytes));
+      });
     })
     .then((data) => {
       if (data.type !== "FeatureCollection" || !Array.isArray(data.features))
         throw Error("Invalid frame");
       cache.set(key, data);
-      while (cache.size > 32) cache.delete(cache.keys().next().value);
+      while (cache.size > 12) cache.delete(cache.keys().next().value);
       return data;
     })
     .finally(() => pending.delete(key));
@@ -288,16 +403,21 @@ async function show(i) {
   try {
     const frame = await fetchFrame(index);
     if (token !== revision) return false;
+    activePopup?.remove();
+    activePopup = null;
     currentFrame = frame;
     renderContours();
     displayed = index;
     $("map").dataset.date = dates[index];
-    for (let n = 1; n <= 5; n++)
+    for (let n = 1; n <= 2; n++)
       fetchFrame((index + n) % dates.length).catch(() => {});
     return true;
   } catch (e) {
     if (token === revision) {
+      activePopup?.remove();
+      activePopup = null;
       currentFrame = null;
+      map.getSource("bands").setData(empty);
       map.getSource("sunset").setData(empty);
       delete $("map").dataset.date;
       status("This evening couldn’t load. Choose another date or retry.", true);

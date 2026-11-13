@@ -74,22 +74,26 @@
               ⌖
             </button>
           </div>
-          <div class="legend">
-            <div class="legend-title">
-              CHOOSE A SUNSET TIME <span>LOCAL TIME</span>
-            </div>
-            <div
-              class="legend-items"
-              id="legend"
-              role="group"
-              aria-label="Sunset hour"
-            ></div>
-            <p id="contour-note">
-              Every segment marks a 6:00 pm sunset, local time.
-            </p>
-          </div>
           <div class="map-note">One evening.<br />A thousand horizons.</div>
         </section>
+        <div class="legend">
+          <div class="legend-title">
+            LOCAL SUNSET · P.M. <span>LOCAL TIME</span>
+          </div>
+          <div
+            id="band-scale"
+            class="band-scale"
+            aria-label="Sunset bands"
+          ></div>
+          <div class="highlight-title">HIGHLIGHT A CUTOFF</div>
+          <div
+            class="legend-items"
+            id="legend"
+            role="group"
+            aria-label="Highlight sunset cutoff"
+          ></div>
+          <p id="contour-note">Tap the map for a local sunset time.</p>
+        </div>
         <section class="timeline" aria-label="Date and animation controls">
           <div class="timeline-top">
             <div class="play-group">
@@ -186,23 +190,29 @@
         <div class="eyebrow">FIELD NOTES / 001</div>
         <h2>A clock drawn<br />across the land.</h2>
         <p>
-          Each labeled line connects places where the Sun sets at the same
-          <strong>local clock time</strong> on the selected date. Follow a line
-          and you share an evening, even hundreds of miles apart.
+          Five fixed color bands show sunset by the
+          <strong>local clock</strong> on the selected date: before 5 pm, 5–6
+          pm, 6–7 pm, 7–8 pm, and 8 pm or later. Highlight one cutoff to follow
+          it through the year. Tap any filled area for its modeled sunset time
+          and UTC offset.
         </p>
-        <h3>Why the lines break</h3>
+        <h3>Why colors jump at borders</h3>
         <p>
-          Time zones change the clock, not the Sun. Lines stop at zone
-          boundaries and coastlines. Daylight saving time creates jumps on March
-          8 and November 1. Most of Arizona stays on standard time; the Navajo
-          Nation observes daylight saving, while Hopi does not.
+          Time zones change the clock, not the Sun. A sunset of 7:40 pm on one
+          side of a border can be 8:40 pm on the other, so the border is part of
+          the edge of the 8 pm or later area. The highlight follows those edges
+          as well as the solar curves. Daylight saving time creates jumps on
+          March 8 and November 1. Most of Arizona stays on standard time; the
+          Navajo Nation observes daylight saving, while Hopi does not.
         </p>
         <h3>A modeled horizon</h3>
         <p>
           We use Astronomy Engine and a solar-center altitude of −0.833333°,
           modeling standard refraction over an unobstructed sea-level horizon.
-          Mountains, elevation, and weather can change the sunset you see.
-          Contours are sampled every 0.1° latitude and clipped to land.
+          Mountains, elevation, and weather can change the sunset you see. Solar
+          curves are sampled every 0.1° latitude. Bands are clipped to U.S. land
+          and time zones; shared map boundaries are simplified at 0.002° for
+          display.
         </p>
         <h3>Sources & open data</h3>
         <p>

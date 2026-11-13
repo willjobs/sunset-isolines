@@ -800,3 +800,337 @@ dialog a {
     font-size: 8px;
   }
 }
+/* Keep the map unobstructed; the fixed scale and cutoff controls live below it. */
+.legend {
+  position: static;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px 28px;
+  margin-top: 12px;
+  padding: 18px 22px;
+  box-shadow: none;
+  background: #f0f0e7;
+  backdrop-filter: none;
+}
+.legend-title {
+  grid-column: 1;
+  grid-row: 1;
+  font-size: 9px;
+}
+.legend-title span {
+  margin-left: 12px;
+}
+.band-scale {
+  display: flex;
+  grid-column: 1;
+  grid-row: 2;
+  gap: 0;
+  max-width: 530px;
+  width: 100%;
+}
+.band-scale > span {
+  flex: 1;
+  font-size: 10px;
+  color: #5e6f60;
+  text-align: center;
+  white-space: nowrap;
+}
+.band-scale i {
+  display: block;
+  height: 14px;
+  margin-bottom: 7px;
+}
+.band-scale > span:first-child i {
+  border-radius: 3px 0 0 3px;
+}
+.band-scale > span:last-child i {
+  border-radius: 0 3px 3px 0;
+}
+.highlight-title {
+  grid-column: 2;
+  grid-row: 1;
+  font-size: 9px;
+  letter-spacing: 1.2px;
+}
+.legend-items {
+  grid-column: 2;
+  grid-row: 2;
+  align-items: start;
+  margin: 0;
+}
+.legend-items button {
+  min-width: 48px;
+  min-height: 40px;
+}
+.legend-items button[aria-pressed="true"] {
+  background: #2b4540;
+  border-color: #2b4540;
+}
+.legend p {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 10px;
+  line-height: 1.5;
+  min-height: 15px;
+}
+.maplibregl-popup-close-button {
+  min-width: 36px;
+  min-height: 36px;
+  font-size: 22px;
+}
+@media (max-width: 700px) {
+  header {
+    height: 62px;
+  }
+  .about-trigger {
+    min-height: 44px;
+    padding: 0 5px;
+  }
+  .intro {
+    padding: 22px 0 20px;
+  }
+  h1 {
+    font-size: 33px;
+  }
+  .intro p {
+    font-size: 11px;
+  }
+  .map-shell {
+    height: clamp(310px, 44svh, 440px);
+    min-height: 310px;
+  }
+  .map-tools button {
+    width: 44px;
+    height: 44px;
+  }
+  .map-tools {
+    top: 10px;
+    right: 10px;
+  }
+  .map-caption {
+    font-size: 7px;
+    max-width: calc(100% - 80px);
+  }
+  .map-status {
+    top: auto;
+    bottom: 35px;
+    left: 50%;
+    width: calc(100% - 32px);
+    max-width: calc(100% - 32px);
+  }
+  .legend {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 10px;
+    padding: 16px;
+    border-radius: 5px;
+  }
+  .band-scale {
+    max-width: none;
+    gap: 0;
+  }
+  .band-scale > span {
+    font-size: 10px;
+  }
+  .band-scale i {
+    height: 16px;
+  }
+  .highlight-title {
+    font-size: 8px;
+    margin-top: 4px;
+  }
+  .legend-items {
+    display: flex;
+    gap: 6px;
+  }
+  .legend-items button {
+    flex: 1;
+    min-width: 0;
+    min-height: 44px;
+    font-size: 12px;
+    padding: 6px;
+  }
+  .legend p {
+    font-size: 10px;
+    min-height: 30px;
+    margin: 0;
+  }
+  .timeline {
+    margin-top: 12px;
+    padding: 16px;
+  }
+  .timeline-top {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 14px 8px;
+  }
+  .play-group {
+    gap: 10px;
+  }
+  #play {
+    width: 44px;
+    height: 44px;
+  }
+  .play-group strong {
+    font-size: 11px;
+  }
+  .play-group span {
+    font-size: 10px;
+  }
+  .date-controls {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    display: grid;
+    grid-template-columns: 44px 1fr 44px;
+    gap: 12px;
+  }
+  .date-controls button {
+    height: 44px;
+    font-size: 20px;
+  }
+  .date-input-label {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f7f7ef;
+    border: 1px solid #d5dacd;
+    border-radius: 4px;
+    min-width: 0;
+  }
+  .date-input-label input {
+    font-size: 16px;
+    width: auto;
+    max-width: 100%;
+    height: 44px;
+    text-align: center;
+    min-width: 0;
+  }
+  .speed-label {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    font-size: 8px;
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .speed-label select {
+    font-size: 12px;
+    min-height: 36px;
+    padding: 6px;
+  }
+  .slider-wrap {
+    margin-top: 18px;
+  }
+  #timeline {
+    height: 44px;
+    touch-action: pan-y;
+  }
+  #timeline::-webkit-slider-thumb {
+    height: 24px;
+    width: 24px;
+    margin-top: -10.5px;
+  }
+  #timeline::-moz-range-thumb {
+    height: 18px;
+    width: 18px;
+  }
+  .months {
+    margin-top: 0;
+    font-size: 8px;
+  }
+  .season-markers {
+    height: 44px;
+    margin-top: 8px;
+    display: flex;
+    justify-content: space-between;
+    gap: 2px;
+  }
+  .season-markers button {
+    position: static;
+    flex: 1;
+    min-height: 44px;
+    font-size: 10px;
+    padding: 6px 0;
+  }
+  .season-markers button span {
+    display: block;
+    font-size: 8px;
+    margin: 3px 0 0;
+  }
+  footer {
+    font-size: 10px;
+    align-items: center;
+  }
+  footer button {
+    font-size: 10px;
+    min-height: 44px;
+    max-width: 145px;
+  }
+  dialog input,
+  dialog select {
+    font-size: 16px;
+  }
+}
+@media (max-width: 360px) {
+  .play-group strong {
+    font-size: 10px;
+  }
+  .intro p {
+    max-width: 190px;
+  }
+  .date-card {
+    min-width: 96px;
+    padding-left: 10px;
+  }
+  h1 {
+    font-size: 30px;
+  }
+  .legend {
+    padding: 13px;
+  }
+  .band-scale > span {
+    font-size: 9px;
+  }
+}
+
+@media (max-width: 700px) {
+  .speed-label select {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 700px) {
+  .intro {
+    padding: 18px 0;
+  }
+  .intro p {
+    display: none;
+  }
+  h1 {
+    font-size: 30px;
+    margin: 9px 0 0;
+  }
+  .date-card {
+    padding-bottom: 0;
+  }
+  .map-shell {
+    height: clamp(290px, 40svh, 360px);
+    min-height: 290px;
+  }
+  .legend {
+    padding: 12px;
+    gap: 8px;
+  }
+  .highlight-title {
+    display: none;
+  }
+  .legend p {
+    min-height: 24px;
+  }
+  .band-scale i {
+    height: 14px;
+    margin-bottom: 5px;
+  }
+}
