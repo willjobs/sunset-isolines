@@ -1,10 +1,9 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;550;600;700&family=Playfair+Display:ital,wght@0,500;1,500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;550;600;700&display=swap");
 :root {
   font-family: "DM Sans", sans-serif;
   color: #283e3b;
   background: #f6f4ee;
   font-synthesis: none;
-  --serif: "Playfair Display", Georgia, serif;
 }
 * {
   box-sizing: border-box;
@@ -30,7 +29,7 @@ button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 a:focus-visible {
-  outline: 2px solid #a9704b;
+  outline: 2px solid #46534e;
   outline-offset: 3px;
 }
 button,
@@ -56,6 +55,10 @@ header {
   border-bottom: 1px solid #dcded4;
   gap: 12px;
 }
+.brand-heading {
+  margin: 0;
+  font: inherit;
+}
 .brand {
   display: flex;
   align-items: center;
@@ -73,46 +76,18 @@ header {
   stroke: #ad704e;
   stroke-width: 1.5;
 }
-.edition {
-  font-size: 11px;
-  color: #7b8378;
-}
 #about-open {
   font-size: 12px;
   min-height: 44px;
   padding: 0 4px;
 }
-#about-open span {
-  margin-left: 10px;
-  color: #a9704b;
-}
 main {
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  grid-template-rows: minmax(0, 1fr) auto auto;
   gap: 14px;
   padding: 18px 0 20px;
-}
-.intro {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 15px;
-}
-h1 {
-  font: 500 clamp(28px, 3.4vw, 52px) / 1.18 var(--serif);
-  letter-spacing: -1.5px;
-  margin: 0;
-}
-h1 em {
-  font-weight: 500;
-  color: #b16e46;
-}
-.intro p {
-  font-size: 12px;
-  color: #7b8378;
-  margin: 0;
 }
 .map-shell {
   position: relative;
@@ -190,19 +165,15 @@ h1 em {
   justify-content: space-between;
   margin-bottom: 8px;
 }
-.legend-title > span {
-  font-size: 8px;
-  letter-spacing: 0.7px;
-  color: #8a8f80;
-}
 .band-scale {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
 }
 .band-scale > span {
   text-align: center;
-  font-size: 10px;
-  color: #65745f;
+  font-size: 12px;
+  font-weight: 500;
+  color: #35433b;
   white-space: nowrap;
 }
 .band-scale i {
@@ -251,7 +222,7 @@ h1 em {
   place-items: center;
 }
 #play:hover {
-  background: #a9704b;
+  background: #46534e;
 }
 #play svg {
   width: 18px;
@@ -271,10 +242,11 @@ h1 em {
 .date-input-label input {
   width: 100%;
   min-width: 0;
-  max-width: 160px;
+  max-width: 180px;
   border: 0;
   background: transparent;
-  font-size: 14px;
+  font-size: 18px;
+  font-weight: 600;
   padding: 0 8px;
   min-height: 42px;
   text-align: center;
@@ -302,26 +274,26 @@ h1 em {
 #timeline::-webkit-slider-runnable-track {
   height: 3px;
   border-radius: 3px;
-  background: linear-gradient(90deg, #9c7183, #efcf82 50%, #9c7183);
+  background: #bcc4bf;
 }
 #timeline::-moz-range-track {
   height: 3px;
-  background: linear-gradient(90deg, #9c7183, #efcf82, #9c7183);
+  background: #bcc4bf;
 }
 #timeline::-webkit-slider-thumb {
   appearance: none;
   width: 18px;
   height: 18px;
-  background: #a9704b;
+  background: #46534e;
   border: 3px solid #fafbf1;
   border-radius: 50%;
-  box-shadow: 0 0 0 1px #a9704b;
+  box-shadow: 0 0 0 1px #46534e;
   margin-top: -7.5px;
 }
 #timeline::-moz-range-thumb {
   width: 12px;
   height: 12px;
-  background: #a9704b;
+  background: #46534e;
   border: 3px solid #fafbf1;
   border-radius: 50%;
 }
@@ -412,31 +384,24 @@ dialog::backdrop {
   height: 44px;
   font-size: 28px;
 }
-.eyebrow {
-  font-size: 9px;
-  letter-spacing: 2px;
-}
 h2 {
-  font: 500 36px/1.2 var(--serif);
-  margin: 22px 0;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.25;
+  margin: 0 30px 20px 0;
 }
 dialog h3 {
-  font-size: 12px;
+  font-size: 14px;
   margin: 25px 0 8px;
 }
 dialog p {
-  font-size: 12px;
-  color: #6a786a;
+  font-size: 14px;
+  color: #4e5e52;
   line-height: 1.8;
 }
 dialog a {
-  color: #a8613e;
-}
-.dialog-end {
-  font-style: italic;
-  margin-top: 26px;
-  padding-top: 18px;
-  border-top: 1px solid #dbdece;
+  color: #354f4a;
+  text-underline-offset: 3px;
 }
 @media (max-width: 700px) {
   #app {
@@ -454,29 +419,12 @@ dialog a {
     width: 25px;
     height: 27px;
   }
-  .edition {
-    display: none;
-  }
   #about-open {
     font-size: 11px;
-  }
-  #about-open span {
-    margin-left: 4px;
   }
   main {
     padding: 8px 0 max(8px, env(safe-area-inset-bottom));
     gap: 10px;
-  }
-  .intro {
-    display: block;
-  }
-  h1 {
-    font-size: 28px;
-    letter-spacing: -1px;
-    line-height: 1.2;
-  }
-  .intro p {
-    display: none;
   }
   .map-shell {
     border-radius: 4px;
@@ -503,11 +451,8 @@ dialog a {
     margin-bottom: 5px;
     letter-spacing: 0.8px;
   }
-  .legend-title > span {
-    font-size: 7px;
-  }
   .band-scale > span {
-    font-size: 10px;
+    font-size: 12px;
   }
   .band-scale i {
     height: 12px;
@@ -573,9 +518,6 @@ dialog a {
     padding-top: 5px;
     padding-bottom: 6px;
   }
-  h1 {
-    font-size: 24px;
-  }
   .timeline {
     padding: 6px 8px;
     gap: 3px;
@@ -593,9 +535,6 @@ dialog a {
 @media (max-height: 440px) and (orientation: landscape) {
   header {
     height: 38px;
-  }
-  .intro {
-    display: none;
   }
   .legend {
     max-width: 600px;
@@ -616,7 +555,7 @@ dialog a {
     margin-bottom: 2px;
   }
   .band-scale > span {
-    font-size: 9px;
+    font-size: 11px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -635,14 +574,4 @@ dialog a {
   main {
     grid-template-rows: minmax(0, 1fr) auto auto;
   }
-}
-
-.about-arrow {
-  width: 11px;
-  height: 11px;
-  fill: none;
-  stroke: #a9704b;
-  stroke-width: 1.2;
-  margin-left: 5px;
-  vertical-align: middle;
 }

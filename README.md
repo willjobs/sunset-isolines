@@ -1,4 +1,4 @@
-# Evening Atlas — The shape of sunset
+# Evening Atlas
 
 An interactive atlas of **local-clock sunset** across the contiguous United States, for every day of 2026. Six fixed bands show **before 5 pm, 5–6 pm, 6–7 pm, 7–8 pm, 8–9 pm, and 9 pm or later**. MapLibre + OpenFreeMap, Astronomy Engine, Temporal, and a GPU sunset layer. No API key or application server required.
 

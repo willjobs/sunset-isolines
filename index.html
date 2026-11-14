@@ -6,9 +6,9 @@
     <meta name="theme-color" content="#f5f3ed" />
     <meta
       name="description"
-      content="An interactive atlas of the American evening. Follow local sunset times across the contiguous United States through 2026."
+      content="Local sunset times across the contiguous United States, for every day of 2026."
     />
-    <title>The shape of sunset — An evening atlas</title>
+    <title>Evening Atlas — U.S. sunset times</title>
     <link
       rel="icon"
       type="image/svg+xml"
@@ -18,34 +18,24 @@
   <body>
     <div id="app">
       <header>
-        <a class="brand" href="./" aria-label="Evening atlas home"
-          ><svg viewBox="0 0 40 36" aria-hidden="true">
-            <path
-              d="M6 21a14 14 0 0 1 28 0M2 25h36M9 31h22M20 0v4M3 8l4 4M37 8l-4 4"
-            /></svg
-          ><span>EVENING ATLAS</span></a
-        >
-        <span class="edition">A study of light & time · 2026</span>
-        <button id="about-open" aria-label="About this map">
-          About
-          <svg class="about-arrow" viewBox="0 0 16 16" aria-hidden="true">
-            <path d="M3 13 13 3M4 3h9v9" />
-          </svg>
-        </button>
+        <h1 class="brand-heading">
+          <a class="brand" href="./" aria-label="Evening Atlas"
+            ><svg viewBox="0 0 40 36" aria-hidden="true">
+              <path
+                d="M6 21a14 14 0 0 1 28 0M2 25h36M9 31h22M20 0v4M3 8l4 4M37 8l-4 4"
+              /></svg
+            ><span>EVENING ATLAS</span></a
+          >
+        </h1>
+        <button id="about-open" aria-label="About this map">About</button>
       </header>
       <main>
-        <section class="intro">
-          <h1>The shape of <em>sunset.</em></h1>
-          <p>Local sunset across the contiguous United States.</p>
-        </section>
         <section
           class="map-shell"
           aria-label="Interactive map of local sunset bands"
         >
           <div id="map"></div>
-          <div id="status" role="status" class="map-status">
-            Preparing the evening…
-          </div>
+          <div id="status" role="status" class="map-status">Loading map…</div>
           <button
             id="reset"
             class="reset-map"
@@ -59,11 +49,7 @@
           <span class="map-hint">Tap land for sunset time</span>
         </section>
         <section class="legend" aria-label="Sunset color scale">
-          <div class="legend-title">
-            LOCAL SUNSET · P.M.<span
-              >EARLIER <span aria-hidden="true">→</span> LATER</span
-            >
-          </div>
+          <div class="legend-title">LOCAL SUNSET · P.M.</div>
           <div
             id="band-scale"
             class="band-scale"
@@ -107,33 +93,42 @@
       </main>
       <dialog id="about">
         <button id="about-close" aria-label="Close about dialog">×</button>
-        <div class="eyebrow">FIELD NOTES / 001</div>
-        <h2>A clock drawn<br />across the land.</h2>
+        <h2>About this map</h2>
         <p>
-          Six fixed color bands show sunset by the
-          <strong>local clock</strong> on the selected date: before 5 pm, 5–6
-          pm, 6–7 pm, 7–8 pm, 8–9 pm, and 9 pm or later. Tap any filled area for
-          its modeled sunset time and UTC offset.
+          I was interested in seeing how the lines marking 5 p.m., 6 p.m., and
+          later sunsets move over the course of the year.
         </p>
-        <h3>Why colors jump at borders</h3>
         <p>
-          Time zones change the clock, not the Sun. A sunset of 7:40 pm on one
-          side of a border can be 8:40 pm on the other, so the border is part of
-          the edge between the 7–8 pm and 8–9 pm areas. The fill follows those
-          edges as well as the solar curves. Daylight saving time creates jumps
-          on March 8 and November 1. Most of Arizona stays on standard time; the
-          Navajo Nation observes daylight saving, while Hopi does not.
+          The colors show hourly ranges on the local clock. Drag the date slider
+          or press play to follow the changes, or tap the map for the sunset
+          time at a location. The map covers the contiguous United States in
+          2026.
         </p>
-        <h3>A modeled horizon</h3>
+        <h3>Time zones</h3>
         <p>
-          We use Astronomy Engine and a solar-center altitude of −0.833333°,
-          modeling standard refraction over an unobstructed sea-level horizon.
-          Mountains, elevation, and weather can change the sunset you see. Solar
-          curves are precomputed on a fine north–south grid (approximately 0.1°
-          latitude). Bands are clipped to U.S. land and time zones; shared map
-          boundaries are simplified at 0.002° for display.
+          Sunset might be at 7:40 p.m. on one side of a time-zone boundary and
+          8:40 p.m. on the other. That makes the border an edge between two
+          color bands. These boundaries can run through states, following rivers
+          or county lines.
         </p>
-        <h3>Sources & open data</h3>
+        <p>
+          Daylight saving time starts on March 8 and ends on November 1 in 2026.
+          Most of Arizona stays on standard time all year. The Navajo Nation
+          observes daylight saving time; the Hopi Reservation does not.
+        </p>
+        <h3>Method</h3>
+        <p>
+          Sunset times are calculated with Astronomy Engine using a solar-center
+          altitude of −0.833333°. The model assumes standard atmospheric
+          refraction and an unobstructed horizon at sea level. Mountains,
+          elevation, and weather can change the sunset you see.
+        </p>
+        <p>
+          Curves are precomputed on a 271-point north–south grid, roughly 0.1°
+          of latitude. Land and time-zone boundaries are simplified at 0.002°
+          for display.
+        </p>
+        <h3>Sources</h3>
         <p>
           Time zones:
           <a
@@ -147,12 +142,13 @@
           <a href="https://github.com/cosinekitty/astronomy"
             >Astronomy Engine</a
           >
-          (MIT). Basemap: OpenFreeMap, OpenMapTiles, and OpenStreetMap
-          contributors.
-          <a href="./atlas/manifest.json">Generation metadata</a> ·
+          (MIT). Basemap: <a href="https://openfreemap.org/">OpenFreeMap</a>,
+          <a href="https://openmaptiles.org/">OpenMapTiles</a>, and
+          <a href="https://www.openstreetmap.org/copyright"
+            >OpenStreetMap contributors</a
+          >. <a href="./atlas/manifest.json">Generation metadata</a> ·
           <a href="./DATA-LICENSE.txt">Data license & attribution</a>.
         </p>
-        <p class="dialog-end">Made for the quiet pleasure of noticing.</p>
       </dialog>
     </div>
     <script type="module" src="/src/main.js"></script>
