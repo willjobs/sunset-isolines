@@ -85,9 +85,21 @@ main {
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-rows: minmax(0, 1fr) auto auto;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
   gap: 14px;
   padding: 18px 0 20px;
+}
+.map-heading h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+.map-heading p {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #4e5e52;
 }
 .map-shell {
   position: relative;
@@ -426,6 +438,9 @@ dialog a {
     padding: 8px 0 max(8px, env(safe-area-inset-bottom));
     gap: 10px;
   }
+  .map-heading h2 {
+    font-size: 20px;
+  }
   .map-shell {
     border-radius: 4px;
   }
@@ -572,6 +587,6 @@ dialog a {
 }
 @media (max-height: 440px) and (orientation: landscape) {
   main {
-    grid-template-rows: minmax(0, 1fr) auto auto;
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
   }
 }
