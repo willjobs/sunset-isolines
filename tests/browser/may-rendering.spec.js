@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { PNG } from "pngjs";
-test("May regions stay filled and 9 pm sunsets keep the 9+ color across both frame buffers", async ({
+test("May regions stay filled and 9 pm sunsets keep the 9+ color during repeated date changes", async ({
   page,
 }) => {
   test.setTimeout(60000);
@@ -12,7 +12,9 @@ test("May regions stay filled and 9 pm sunsets keep the 9+ color across both fra
     { timeout: 30000 },
   );
   await page.evaluate(async () => {
-    const { map } = await import("/src/main.js");
+    const { map } = await import(
+      document.querySelector('script[src*="/src/main.js"]').src
+    );
     map.stop();
     map.jumpTo({ center: [-98.5, 38.5], zoom: 2.05 });
     if (!map.loaded()) await map.once("idle");
@@ -66,7 +68,9 @@ test("May regions stay filled and 9 pm sunsets keep the 9+ color across both fra
       timeout: 15000,
     });
     const points = await page.evaluate(async (locations) => {
-      const { map } = await import("/src/main.js");
+      const { map } = await import(
+        document.querySelector('script[src*="/src/main.js"]').src
+      );
       const r = document.querySelector("#map").getBoundingClientRect();
       return locations.map((location) => {
         const p = map.project(location);
@@ -90,30 +94,13 @@ test("May regions stay filled and 9 pm sunsets keep the 9+ color across both fra
   }
 });
 
-test("versioned requests cannot silently display an old five-band response", async ({
+test("rejects an incompatible atlas before displaying colors", async ({
   page,
 }) => {
-  const requests = [];
-  page.on("request", (r) => {
-    if (r.url().includes("/bands/")) requests.push(r.url());
-  });
+  await page.route("**/atlas/manifest.json", (route) =>
+    route.fulfill({ json: { schema: 0, data: "old.bin.gz" } }),
+  );
   await page.goto("/");
-  await expect(page.locator("#map")).toHaveAttribute(
-    "data-date",
-    "2026-03-01",
-    { timeout: 30000 },
-  );
-  await page.route("**/2026-05-25.geojson.gz*", (route) =>
-    route.fulfill({
-      json: { type: "FeatureCollection", bandSchema: 3, features: [] },
-    }),
-  );
-  await page.locator("#date-input").fill("2026-05-25");
-  await page.locator("#date-input").dispatchEvent("change");
   await expect(page.locator("#status")).toContainText("couldn’t load");
-  await expect(page.locator("#map")).toHaveAttribute("data-date", "2026-03-01");
-  expect(requests.length).toBeGreaterThan(0);
-  expect(
-    requests.every((url) => new URL(url).searchParams.get("schema") === "4"),
-  ).toBe(true);
+  await expect(page.locator("#map")).not.toHaveAttribute("data-date", /./);
 });

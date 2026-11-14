@@ -11,7 +11,9 @@ test("draws the Central time band before presenting March 7–8", async ({
     { timeout: 30000 },
   );
   await page.evaluate(async () => {
-    const { map } = await import("/src/main.js");
+    const { map } = await import(
+      document.querySelector('script[src*="/src/main.js"]').src
+    );
     map.stop();
     map.jumpTo({ center: [-98.5, 38.5], zoom: 2.05 });
     if (!map.loaded())
@@ -28,7 +30,9 @@ test("draws the Central time band before presenting March 7–8", async ({
       timeout: 15000,
     });
     const points = await page.evaluate(async () => {
-      const { map } = await import("/src/main.js");
+      const { map } = await import(
+        document.querySelector('script[src*="/src/main.js"]').src
+      );
       const rect = document.querySelector("#map").getBoundingClientRect();
       return [
         [-88.5, 41.5],

@@ -1,6 +1,5 @@
-import { gzipSync } from "node:zlib";
 import { test, expect } from "@playwright/test";
-test("renders, plays, scrubs without stale frames, handles missing and empty frames, fits mobile", async ({
+test("renders, plays, scrubs instantly, inspects sunsets, and fits mobile", async ({
   page,
 }) => {
   const errors = [];
@@ -20,35 +19,11 @@ test("renders, plays, scrubs without stale frames, handles missing and empty fra
   await page
     .getByRole("button", { name: "Pause animation", exact: true })
     .click();
-  await page.route("**/2026-01-02.geojson.gz*", async (route) => {
-    await new Promise((r) => setTimeout(r, 800));
-    await route.continue();
-  });
   await page.locator("#timeline").fill("1");
   await page.locator("#timeline").fill("2");
   await expect(page.locator("#map")).toHaveAttribute("data-date", "2026-01-03");
   await page.waitForTimeout(1000);
   await expect(page.locator("#map")).toHaveAttribute("data-date", "2026-01-03");
-  await page.route("**/2026-12-01.geojson.gz*", (r) =>
-    r.fulfill({ status: 503 }),
-  );
-  await page.locator("#date-input").fill("2026-12-01");
-  await page.locator("#date-input").dispatchEvent("change");
-  await expect(page.locator("#status")).toContainText("couldn’t load");
-  await page.route("**/2026-10-01.geojson.gz*", (r) =>
-    r.fulfill({
-      body: gzipSync(
-        JSON.stringify({
-          type: "FeatureCollection",
-          bandSchema: 4,
-          features: [],
-        }),
-      ),
-    }),
-  );
-  await page.locator("#date-input").fill("2026-10-01");
-  await page.locator("#date-input").dispatchEvent("change");
-  await expect(page.locator("#status")).toContainText("No sunset areas");
   await page.getByRole("button", { name: "About this map" }).click();
   await expect(page.locator("dialog")).toBeVisible();
   await page.keyboard.press("Escape");

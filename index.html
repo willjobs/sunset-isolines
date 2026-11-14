@@ -128,9 +128,9 @@
           We use Astronomy Engine and a solar-center altitude of −0.833333°,
           modeling standard refraction over an unobstructed sea-level horizon.
           Mountains, elevation, and weather can change the sunset you see. Solar
-          curves are sampled every 0.1° latitude. Bands are clipped to U.S. land
-          and time zones; shared map boundaries are simplified at 0.002° for
-          display.
+          curves are precomputed on a fine north–south grid (approximately 0.1°
+          latitude). Bands are clipped to U.S. land and time zones; shared map
+          boundaries are simplified at 0.002° for display.
         </p>
         <h3>Sources & open data</h3>
         <p>
@@ -147,7 +147,8 @@
             >Astronomy Engine</a
           >
           (MIT). Basemap: OpenFreeMap, OpenMapTiles, and OpenStreetMap
-          contributors. <a href="./data/manifest.json">Generation metadata</a> ·
+          contributors.
+          <a href="./atlas/manifest.json">Generation metadata</a> ·
           <a href="./DATA-LICENSE.txt">Data license & attribution</a>.
         </p>
         <p class="dialog-end">Made for the quiet pleasure of noticing.</p>
