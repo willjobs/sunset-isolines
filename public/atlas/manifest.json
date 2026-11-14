@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "year": 2026,
+  "data": "sunset-2026-c30109ffdd4cde75.bin.gz",
+  "sha256": "c30109ffdd4cde75ebdf08fb0945ea18d84978cdfe03f2f621e8e7b34a946a79",
+  "compressedBytes": 1421816,
+  "rawBytes": 2327049,
+  "model": {
+    "altitude": -0.833333,
+    "samples": 271,
+    "sampling": "uniform Mercator Y",
+    "maxLongitudeQuantizationError": 0.00016737321857362986
+  },
+  "geometry": {
+    "vertices": 21187,
+    "triangles": 20829,
+    "boundaryRelease": "2025b"
+  },
+  "runtime": {
+    "node": "v24.22.1",
+    "tzdata": "2026e"
+  }
+}
