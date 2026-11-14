@@ -65,12 +65,23 @@ $("months").innerHTML = [
   .map((m) => `<span>${m}</span>`)
   .join("");
 const base = import.meta.env.BASE_URL;
+// Use the visitor's local calendar day, with February 29 clamped to February 28
+// because the atlas's 2026 calendar is not a leap year.
+const today = new Date();
+const initialDate = Date.UTC(
+  2026,
+  today.getMonth(),
+  today.getMonth() === 1 ? Math.min(today.getDate(), 28) : today.getDate(),
+);
 let dates = [],
-  index = 59,
+  index = (initialDate - Date.UTC(2026, 0, 1)) / 86400000,
   displayed = -1,
   playing = false,
   timer,
   ready = false;
+$("date-input").value = new Date(initialDate).toISOString().slice(0, 10);
+$("timeline").value = index;
+$("timeline").setAttribute("aria-valuetext", dateFormatter.format(initialDate));
 const status = (message, error = false) => {
   $("status").textContent = message;
   $("status").classList.toggle("error", error);

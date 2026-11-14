@@ -4,6 +4,7 @@ test("renders, plays, scrubs instantly, inspects sunsets, and fits mobile", asyn
 }) => {
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
+  await page.clock.setFixedTime(new Date("2026-03-01T12:00:00Z"));
   await page.goto("/");
   await expect(page.locator("#map")).toHaveAttribute(
     "data-date",
@@ -70,6 +71,7 @@ test("iPhone-sized touch controls and map inspection", async ({ browser }) => {
     deviceScaleFactor: 2,
   });
   const page = await context.newPage();
+  await page.clock.setFixedTime(new Date("2026-03-01T12:00:00Z"));
   await page.goto("/");
   await expect(page.locator("#map")).toHaveAttribute(
     "data-date",

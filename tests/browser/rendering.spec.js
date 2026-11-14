@@ -4,6 +4,7 @@ test("draws the Central time band before presenting March 7–8", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 664 });
+  await page.clock.setFixedTime(new Date("2026-03-01T12:00:00Z"));
   await page.goto("/");
   await expect(page.locator("#map")).toHaveAttribute(
     "data-date",

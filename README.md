@@ -15,7 +15,7 @@ Open http://localhost:5173. `npm run build` produces `dist/`; `npm run preview` 
 
 ## Use
 
-Drag the year slider to scrub, choose a date, or step with the arrows. Play advances by calendar day at the selected pace, wraps after December 31, and pauses when the tab is hidden. The initial date is March 1. The palette remains fixed, from dusk purple for early sunsets through rose, amber and gold to pale sunlight for 9 pm or later.
+Drag the year slider to scrub, choose a date, or step with the arrows. Play advances by calendar day at the selected pace, wraps after December 31, and pauses when the tab is hidden. The initial date uses the visitor's local month and day in the atlas's 2026 calendar; February 29 maps to February 28. The palette remains fixed, from dusk purple for early sunsets through rose, amber and gold to pale sunlight for 9 pm or later.
 
 Tap land for its modeled local sunset to the minute, IANA zone and UTC offset. This uses the tapped coordinates and selected calendar date with the same fixed horizon model as the atlas. Tapping pauses playback; changing dates closes the previous popup.
 

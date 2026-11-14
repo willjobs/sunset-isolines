@@ -9,6 +9,7 @@ test("scrubs the entire year offline without fetching days or rebuilding tiles",
     if (/\/(atlas|bands|data)\//.test(r.url())) requests.push(r.url());
   });
   await page.setViewportSize({ width: 390, height: 664 });
+  await page.clock.setFixedTime(new Date("2026-03-01T12:00:00Z"));
   await page.goto("/");
   await expect(page.locator("#map")).toHaveAttribute(
     "data-date",
@@ -98,6 +99,7 @@ test("GPU sampling stays correct without floating-point linear texture filtering
     };
   });
   await page.setViewportSize({ width: 390, height: 664 });
+  await page.clock.setFixedTime(new Date("2026-03-01T12:00:00Z"));
   await page.goto("/");
   await expect(page.locator("#map")).toHaveAttribute(
     "data-date",

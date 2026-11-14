@@ -5,6 +5,7 @@ test("May regions stay filled and 9 pm sunsets keep the 9+ color during repeated
 }) => {
   test.setTimeout(60000);
   await page.setViewportSize({ width: 390, height: 664 });
+  await page.clock.setFixedTime(new Date("2026-03-01T12:00:00Z"));
   await page.goto("/");
   await expect(page.locator("#map")).toHaveAttribute(
     "data-date",
@@ -100,6 +101,7 @@ test("rejects an incompatible atlas before displaying colors", async ({
   await page.route("**/atlas/manifest.json", (route) =>
     route.fulfill({ json: { schema: 0, data: "old.bin.gz" } }),
   );
+  await page.clock.setFixedTime(new Date("2026-03-01T12:00:00Z"));
   await page.goto("/");
   await expect(page.locator("#status")).toContainText("couldn’t load");
   await expect(page.locator("#map")).not.toHaveAttribute("data-date", /./);
