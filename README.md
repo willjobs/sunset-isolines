@@ -88,7 +88,7 @@ BROWSER_ENGINE=webkit npm run test:browser
 
 ## GitHub Pages
 
-The workflow tests and builds on pushes to `main`, uploads `dist/`, and deploys with GitHub Pages. Select **GitHub Actions** in repository **Settings → Pages**. The public URL is https://willjobs.com/sunset-isolines/. No compiled bundles need to be committed.
+The workflow tests and builds on pushes to `main`, uploads `dist/`, and deploys with GitHub Pages. Select **GitHub Actions** in repository **Settings → Pages**. The public URL is https://willjobs.com/evening-atlas/. No compiled bundles need to be committed.
 
 ## Credits and licenses
 
