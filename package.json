@@ -7,6 +7,7 @@
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0",
+    "record:video": "node scripts/record-video.mjs",
     "generate": "node scripts/solar.mjs && .venv/bin/python scripts/clip.py && .venv/bin/python scripts/bands.py && npm run generate:atlas",
     "test": "node --test tests/*.test.mjs",
     "test:browser": "playwright test",

@@ -21,6 +21,30 @@ Tap land for its modeled local sunset to the minute, IANA zone and UTC offset. T
 
 The map, legend and controls fit the visible mobile viewport using `100svh` and safe-area insets. The map is within 10 px of each phone edge, buttons retain 44 px touch targets, and date text is 16 px to avoid iOS focus zoom. Pinch/pan the map; reset restores the national view. About opens a separately scrollable dialog.
 
+## Record an MP4
+
+Install [FFmpeg](https://ffmpeg.org/download.html) (`brew install ffmpeg` on macOS), then run:
+
+```sh
+npm ci
+npx playwright install chromium
+npm run record:video
+```
+
+The script starts its own local server, captures one frame per day from January 1 through December 31, and writes `.cache/evening-atlas-2026.mp4`. It waits for each date to render, so recording speed does not affect video timing. The default is a 1280 × 900 H.264 MP4 at 30 fps, about 12.17 seconds long. It includes the map, legend, date, branding, and basemap attribution, with playback controls hidden. Internet is needed for the basemap and fonts. The website itself is unchanged.
+
+```sh
+# A slower, approximately 24-second year
+npm run record:video -- --fps 15 --output .cache/seasons-slow.mp4
+
+# A short preview
+npm run record:video -- --start 2026-01-01 --end 2026-01-03 --output .cache/preview.mp4
+
+npm run record:video -- --help
+```
+
+Use `--width` and `--height` for other even dimensions (at least 800 × 600). Set `CHROMIUM_PATH` or `FFMPEG_PATH` to select installed executables; `/usr/bin/chromium` is used automatically when present. Output files are never overwritten. Temporary PNG frames are removed when the script finishes or reports an error.
+
 ## Instant scrubbing
 
 A single **approximately 1.4 MB compressed** bundle contains the entire year. After this initial load, date changes require no downloads, GeoJSON parsing, triangulation, worker round trips, source updates, or tile rebuilding. Scrubbing still works with the network disabled.
