@@ -45,7 +45,6 @@ function initializeAtlas() {
   $("map").dataset.renderer = "gpu";
   $("map").dataset.bandCount = "6";
   status("");
-  fit();
   show(index);
 }
 $("months").innerHTML = [
@@ -86,47 +85,38 @@ const status = (message, error = false) => {
   $("status").textContent = message;
   $("status").classList.toggle("error", error);
 };
+const usBounds = [
+  [-125, 24],
+  [-66.5, 50],
+];
+const usPadding = { top: 12, bottom: 28, left: 10, right: 10 };
 const map = new maplibregl.Map({
   container: "map",
   style: "https://tiles.openfreemap.org/styles/positron",
-  center: [-98.5, 38.5],
-  zoom: 3.4,
-  minZoom: 2,
+  bounds: usBounds,
+  fitBoundsOptions: { padding: usPadding },
+  minZoom: 1,
   maxZoom: 9,
   renderWorldCopies: false,
   attributionControl: { compact: true },
   fadeDuration: 200,
   cooperativeGestures: false,
+  trackResize: false,
 });
 map.dragRotate.disable();
 map.touchZoomRotate.disableRotation();
-const fit = () =>
-  map.fitBounds(
-    [
-      [-125, 24],
-      [-66.5, 50],
-    ],
-    {
-      padding: { top: 12, bottom: 28, left: 10, right: 10 },
-      duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches
-        ? 0
-        : 900,
-    },
-  );
-let resizeTimer;
-map.on("resize", () => {
-  clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(() => {
-    if (ready)
-      map.fitBounds(
-        [
-          [-125, 24],
-          [-66.5, 50],
-        ],
-        { padding: { top: 12, bottom: 28, left: 10, right: 10 }, duration: 0 },
-      );
-  }, 150);
-});
+const container = map.getContainer();
+const fit = () => {
+  if (!container.clientWidth || !container.clientHeight) return;
+  map.stop();
+  map.resize();
+  map.fitBounds(usBounds, { padding: usPadding, duration: 0 });
+};
+// MapLibre skips its first resize notification. It can already describe a
+// different size from the one measured during construction.
+const resizeObserver = new ResizeObserver(fit);
+resizeObserver.observe(container);
+map.once("remove", () => resizeObserver.disconnect());
 $("reset").onclick = fit;
 map.on("error", (e) => {
   if (!ready)
